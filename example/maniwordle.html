@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <script src="http://d3js.org/d3.v3.js"></script>
-<script src="../SAT.js"></script>
+<script src="../js/SAT.js"></script>
 <body>
 <script type="text/javascript">
 
@@ -200,7 +200,13 @@
 
         return intersection;
     }
- 
+
+    // Version 0.2 - Copyright 2013 -  Jim Riecken <jimr@jimr.ca>
+    //
+    // Released under the MIT License - https://github.com/jriecken/sat-js
+    //
+    // A simple library for determining intersections of circles and
+    // polygons using the Separating Axis Theorem.
     function doRotatedRectsIntersect(rect1, rect2) {
     
         var pointsRect1 = getRotatedEdgePoints(rect1); // contains lt-, rt-, rb-, lb-edge point
