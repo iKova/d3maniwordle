@@ -6,6 +6,7 @@
     <script src="http://d3js.org/d3.v3.js"></script>
     <script src="../js/SAT.js"></script>
     <script src="../d3.maniwordle.js"></script>
+    <script type="text/javascript" src="../js/jscolor/jscolor.js"></script>
 </head>
 <body>
 <script type="text/javascript">
@@ -143,15 +144,42 @@ Change rotation: <input onChange='interaction.rotateSelection();' id="rotation" 
     Unpin Word
 </button>
 <br><br>
+<label for="colorpicker"> <input onChange='interaction.changeColor();' type="color" id="colorpicker"> Color </label>
+<label for="fontpicker">
+    <select  onChange='interaction.changeFont();'  id="fontpicker">
+        <option>Helvetica</option>
+        <option>Arial</option>
+        <option>Verdana</option>
+        <option>Avantgarde</option>
+        <option>Gill Sans</option>
+        <option>Times New Roman</option>
+        <option>Times</option>
+        <option>Palatino</option>
+        <option>Bookman</option>
+        <option>New Century Schoolbook</option>
+        <option>Andale Mono</option>
+        <option>Courier New</option>
+        <option>Courier</option>
+        <option>Lucidatypewriter</option>
+        <option>Impact</option>
+        <option>Oldtown</option>
+    </select>
+    Font-Family </label>
+<br><br>
 <textarea type="textarea" id="textsource" style="width: 900px;"> Insert your text here... </textarea>
+
 <div>
     <button onClick='redrawNewManiWordle()'>
         Load Text
     </button>
-    <label for="wordnumb"> <input onChange='redrawNewManiWordle()' id="wordnumb" value="50" min="5" max="100" type="number" style="width:50px"> max. #Word </label>
-    <label for="stoprem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="stoprem"> Stopwords-Removal </label>
-    <label for="punctrem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="punctrem"> Punctuation-Removal </label>
-    <label for="numbrem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="numbrem"> Number-Removal </label>
+    <label for="wordnumb"> <input onChange='redrawNewManiWordle()' id="wordnumb" value="50" min="5" max="100"
+                                  type="number" style="width:50px"> max. #Word </label>
+    <label for="stoprem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="stoprem">
+        Stopwords-Removal </label>
+    <label for="punctrem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="punctrem">
+        Punctuation-Removal </label>
+    <label for="numbrem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="numbrem">
+        Number-Removal </label>
 </div>
 
 

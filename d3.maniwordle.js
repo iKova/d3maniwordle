@@ -6,6 +6,7 @@
             data = [],
             startx, starty,
             color = dummyColor,
+            font = dummyFont,
             weight = dummyWeight,
             rotate = dummyRotate,
             drawTransition = 250,
@@ -32,6 +33,7 @@
                 d.x = startx;
                 d.y = starty;
                 d.color = color.call(this, d, i);
+                d.font = font.call(this, d, i);
                 d.rotate = rotate.call(this, d, i);
                 d.weight = ~~(weight.call(this, d, i));
                 d.pinned = false;
@@ -109,6 +111,9 @@
                 .attr('fill', function (d, i) {
                     return d.color;
                 })
+                .attr('font-family', function (d, i) {
+                    return d.font;
+                })
                 .attr('transform', function (d, i) {
                     return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
                 });
@@ -136,6 +141,14 @@
 
             if (!arguments.length) return color;
             color = d3.functor(x);
+            return maniwordle;
+
+        };
+
+        maniwordle.font = function (x) {
+
+            if (!arguments.length) return font;
+            font = d3.functor(x);
             return maniwordle;
 
         };
@@ -171,6 +184,11 @@
 
             interaction.select = function (d) {
 
+                var colorpicker = d3.select("#colorpicker");
+                colorpicker.property("value", d.color);
+
+                var fontpicker = d3.select("#fontpicker");
+                fontpicker.property("value", d.font);
                 // unselect currently selected word first
                 d_old = getSelectedWord();
                 if (d_old != null) interaction.unselect(d_old);
@@ -310,6 +328,26 @@
 
             };
 
+            interaction.changeColor = function () {
+
+                d = getSelectedWord();
+                var color = d3.select("#colorpicker").property("value");
+                d.color = color;
+
+                svg.select('#' + d.text).attr('fill', color);
+                //maniwordle.redraw(true, drawTransition);
+            };
+
+            interaction.changeFont = function () {
+
+                d = getSelectedWord();
+                var font = d3.select("#fontpicker").property("value");
+                d.font = font;
+
+                svg.select('#' + d.text).attr('font-family', font);
+                //maniwordle.redraw(true, drawTransition);
+            };
+
             interaction.rotateSelection = function () {
 
                 d = getSelectedWord();
@@ -327,6 +365,8 @@
 
                 return null;
             }
+
+
 
             interaction.loadTextsource = function () {
 
@@ -600,6 +640,10 @@
 
         function dummyWeight() {
             return 100;
+        }
+
+        function dummyFont() {
+            return "Arial";
         }
 
         function getStopwords() {
