@@ -11,17 +11,19 @@
             drawTransition = 250,
             svg = d3.select('svg').select('g');
 
-        //boundings = function(d) { return [Math.random() * width, Math.random()*height] };
         getNewPos = getBoundings;
 
         maniwordle.startx = function (x) {
             startx = x;
             return maniwordle;
         };
+
         maniwordle.starty = function (y) {
             starty = y;
             return maniwordle;
         };
+
+        svg.selectAll("*").remove();
 
         maniwordle.start = function () {
 
@@ -191,13 +193,11 @@
             interaction.pin = function (d) {
 
                 d.pinned = true;
-
             };
 
             interaction.unpin = function (d) {
 
                 d.pinned = false;
-
             };
 
             interaction.unpinAll = function (d) {
@@ -322,17 +322,92 @@
             function getSelectedWord() {
 
                 for (var i = 0; i < data.length; i++) {
-
                     if (data[i].selected) return data[i];
-
                 }
 
                 return null;
+            }
 
+            interaction.loadTextsource = function () {
+
+                var rawText = d3.select('#textsource').property('value');
+                var wordnumb = d3.select('#wordnumb').property('value');
+
+                var stoprem = d3.select('#stoprem').property('checked');
+                var punctrem = d3.select('#punctrem').property('checked');
+                var numbrem = d3.select('#numbrem').property('checked');
+
+                var prepText = getPreprocessedText(rawText, stoprem, punctrem, numbrem);
+
+                data = getDataFromText(prepText, wordnumb);
+
+                return data;
+            };
+
+            function getPreprocessedText(text, stoprem, punctrem, numbrem) {
+
+                if(stoprem) {
+                    var stopwords = getStopwords();
+                    for(var i=0; i < stopwords.length; i++) {
+                        text = text.replace(" " + stopwords[i] + " "," ");
+                    }
+                }
+
+                if(punctrem) {
+                    text = text.replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+                }
+
+                if(numbrem) {
+                    text = text.replace(/[0-9]/g, '');
+                }
+
+                return text;
+            }
+
+            function getDataFromText(str, wordnumb) {
+
+                str = trimWhitespaces(str);
+
+                var split = str.split(" "), obj = {};
+
+                for (var x = 0; x < split.length; x++) {
+
+                    if (obj[split[x]] === undefined) {
+                            obj[split[x]] = 1;
+                    } else {
+                        obj[split[x]]++;
+                    }
+                }
+
+                var data = new Array();
+
+                //var len =  Object.keys(obj).length;
+                var len = wordnumb;
+
+                for (var i = 0; (i < len && i < Object.keys(obj).length); i++) {
+                    data.push({
+                        text: Object.keys(obj)[i],
+                        weight: obj[split[i]]
+                    });
+                }
+
+                return data;
             }
 
             return interaction;
         };
+
+        function trimWhitespaces(str) {
+            str = str.replace(/\s\s+/g, ' ');
+            str = str.replace(/^\s+/, '');
+            for (var i = str.length - 1; i >= 0; i--) {
+                if (/\S/.test(str.charAt(i))) {
+                    str = str.substring(0, i + 1);
+                    break;
+                }
+            }
+            return str;
+        }
 
         function drawHighlightBox(d) {
 
@@ -373,13 +448,13 @@
                 var spiralPoint, n = 0;
 
                 do {
-
                     spiralPoint = getNextSpiralPoint(n, angleDev, orig_x, orig_y, sign);
 
                     n += 1;
 
-                    if (stopCounter == 1000) // TODO: IMPLEMENT HANDLING WHEN NO SPACE IS LEFT
+                    if (stopCounter == 1000) {
                         break;
+                    }
 
                     // continue if spiral point is out of bounds
                     if (spiralPoint[0] < 0 || spiralPoint[0] > (width - d.width) || spiralPoint[1] < 0 || spiralPoint[1] > (height - d.height)) {
@@ -390,9 +465,7 @@
                     d.x = spiralPoint[0];
                     d.y = spiralPoint[1];
 
-                    //console.log("STILL WITHIN BORDERS? " + withinBorders(rectSmaller));
-
-                } while (intersectBiggerRect(bigRect, d)); // TODO CHECK IF WITHIN BORDERS
+                } while (intersectBiggerRect(bigRect, d) || !withinBorders(d));
             }
 
             return [d.x, d.y];
@@ -401,10 +474,9 @@
         function getPinnedElements() {
 
             var pinnedArr = [];
+
             for (var i = 0; i < data.length; i++) {
-
                 if (data[i].pinned) pinnedArr.push(data[i]);
-
             }
 
             return pinnedArr;
@@ -437,17 +509,15 @@
 
         function withinBorders(rect) {
 
-            if (rect.x - rect.width / 2 < 0)
-                return false;
+            var pointsRect = getRotatedEdgePoints(rect);
 
-            if (rect.x + rect.width / 2 > (width - margin.right))
-                return false;
+            for(var i=0; i<pointsRect.length; i++) {
+                if(pointsRect[i].x < (0 + margin.left) || pointsRect[i].x > (width - margin.right))
+                    return false;
 
-            if (rect.y - rect.height < 0)
-                return false;
-
-            if (rect.y > (height - margin.bottom))
-                return false;
+                if(pointsRect[i].y < (0 + margin.top) || pointsRect[i].y > (height - margin.bottom))
+                    return false
+            }
 
             return true;
         }
@@ -530,6 +600,11 @@
 
         function dummyWeight() {
             return 100;
+        }
+
+        function getStopwords() {
+            // https://code.google.com/p/stop-words/
+            return ["I", "a", "about", "an", "are", "as", "at", "be", "by", "com", "for", "from", "how", "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "was", "what", "when", "where", "who", "will", "with", "www", "a's", "able", "above", "according", "accordingly", "across", "actually", "after", "afterwards", "again", "against", "ain't", "all", "allow", "allows", "almost", "alone", "along", "already", "also", "although", "always", "am", "among", "amongst", "and", "another", "any", "anybody", "anyhow", "anyone", "anything", "anyway", "anyways", "anywhere", "apart", "appear", "appreciate", "appropriate", "aren't", "around", "aside", "ask", "asking", "associated", "available", "away", "awfully", "b", "became", "because", "become", "becomes", "becoming", "been", "before", "beforehand", "behind", "being", "believe", "below", "beside", "besides", "best", "better", "between", "beyond", "both", "brief", "but","c","c'mon","c's","came","can","can't","cannot","cant","cause","causes","certain","certainly","changes","clearly","co","come","comes","concerning","consequently","consider","considering","contain","containing","contains","corresponding","could","couldn't","course","currently","d","definitely","described","despite","did","didn't","different","do","does","doesn't","doing","don't","done","down","downwards","during","e","each","edu","eg","eight","either","else","elsewhere","enough","entirely","especially","et","etc","even","ever","every","everybody","everyone","everything","everywhere","ex","exactly","example","except","f","far","few","fifth","first","five","followed","following","follows","former","formerly","forth","four","further","furthermore","g","get","gets","getting","given","gives","go","goes","going","gone","got","gotten","greetings","h","had","hadn't","happens","hardly","has","hasn't","have","haven't","having","he","he's","hello","help","hence","her","here","here's","hereafter","hereby","herein","hereupon","hers","herself","hi","him","himself","his","hither","hopefully","howbeit","however","i","i'd","i'll","i'm","i've","ie","if","ignored","immediate","inasmuch","inc","indeed","indicate","indicated","indicates","inner","insofar","instead","into","inward","isn't","it'd","it'll","it's","its","itself","j","just","k","keep","keeps","kept","know","knows","known","l","last","lately","later","latter","latterly","least","less","lest","let","let's","like","liked","likely","little","look","looking","looks","ltd","m","mainly","many","may","maybe","me","mean","meanwhile","merely","might","more","moreover","most","mostly","much","must","my","myself","n","name","namely","nd","near","nearly","necessary","need","needs","neither","never","nevertheless","new","next","nine","no","nobody","non","none","noone","nor","normally","not","nothing","novel","now","nowhere","o","obviously","off","often","oh","ok","okay","old","once","one","ones","only","onto","other","others","otherwise","ought","our","ours","ourselves","out","outside","over","overall","own","p","particular","particularly","per","perhaps","placed","please","plus","possible","presumably","probably","provides","q","que","quite","qv","r","rather","rd","re","really","reasonably","regarding","regardless","regards","relatively","respectively","right","s","said","same","saw","say","saying","says","second","secondly","see","seeing","seem","seemed","seeming","seems","seen","self","selves","sensible","sent","serious","seriously","seven","several","shall","she","should","shouldn't","since","six","so","some","somebody","somehow","someone","something","sometime","sometimes","somewhat","somewhere","soon","sorry","specified","specify","specifying","still","sub","such","sup","sure","t","t's","take","taken","tell","tends","th","than","thank","thanks","thanx","that's","thats","their","theirs","them","themselves","then","thence","there","there's","thereafter","thereby","therefore","therein","theres","thereupon","these","they","they'd","they'll","they're","they've","think","third","thorough","thoroughly","those","though","three","through","throughout","thru","thus","together","too","took","toward","towards","tried","tries","truly","try","trying","twice","two","u","un","under","unfortunately","unless","unlikely","until","unto","up","upon","us","use","used","useful","uses","using","usually","uucp","v","value","various","very","via","viz","vs","w","want","wants","wasn't","way","we","we'd","we'll","we're","we've","welcome","well","went","were","weren't","what's","whatever","whence","whenever","where's","whereafter","whereas","whereby","wherein","whereupon","wherever","whether","which","while","whither","who's","whoever","whole","whom","whose","why","willing","wish","within","without","won't","wonder","would","wouldn't","x","y","yes","yet","you","you'd","you'll","you're","you've","your","yours","yourself","yourselves","z","zero","he'd","he'll","how's","mustn't","shan't","she'd","she'll","she's","when's","why's","abroad","adj","ago","ahead","alongside","amid","amidst","back","backward","backwards","begin","caption","co.","dare","daren't","directly","eighty","end","ending","evermore","fairly","farther","fewer","forever","forward","found","half","hundred","inc.","inside","likewise","low","lower","made","make","makes","mayn't","meantime","mightn't","mine","minus","miss","mr","mrs","needn't","neverf","neverless","ninety","nonetheless","no-one","notwithstanding","one's","opposite","oughtn't","past","provided","recent","recently","round","someday","taking","that'll","that've","there'd","there'll","there're","there've","thing","things","thirty","till","underneath","undoing","unlike","upwards","versus","what'll","what've","whichever","whilst","who'd","who'll","whomever","zero"];
         }
 
         return maniwordle;
