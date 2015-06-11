@@ -28,6 +28,8 @@
 
         maniwordle.start = function () {
 
+            svg.selectAll("*").remove();
+
             data = data.map(function (d, i) {
 
                 d.x = startx;
@@ -99,7 +101,7 @@
                         d.x = newPosition[0];
                         d.y = newPosition[1];
                     }
-                    d3.select('#doneSign').text(+(i + 1) + '');
+                    //d3.select('#doneSign').text(+(i + 1) + '');
                     return d;
                 });
 
@@ -184,27 +186,23 @@
 
             interaction.select = function (d) {
 
-                var colorpicker = d3.select("#colorpicker");
-                colorpicker.property("value", d.color);
-
-                var fontpicker = d3.select("#fontpicker");
-                fontpicker.property("value", d.font);
                 // unselect currently selected word first
                 d_old = getSelectedWord();
                 if (d_old != null) interaction.unselect(d_old);
 
                 d.selected = true;
-                d.color = 'red';
-                svg.select('#' + d.text).attr('fill', d.color);
+                svg.select('#' + d.text).attr('text-decoration', 'underline');
 
+                // populate with selection values
                 d3.select("#rotation").property("value", d.rotate + "");
+                d3.select("#colorpicker").property("value", d.color);
+                d3.select("#fontpicker").property("value", d.font);
             };
 
             interaction.unselect = function (d) {
 
                 d.selected = false;
-                d.color = maniwordle.color().call(this, d, data.indexOf(d));
-                svg.select('#' + d.text).attr('fill', d.color);
+                svg.select('#' + d.text).attr('text-decoration', '');
 
             };
 
@@ -259,6 +257,9 @@
             };
 
             interaction.dragend = function (d) {
+
+                // Chrome always fires a dragmove event, even on clicks
+                // therefore recognize a dragend only when 2+ events have fired
 
                 if (dragging > 1) {
 
@@ -315,11 +316,17 @@
 
                 data = data.map(function (d, i) {
 
-                    if (!d.selected) {
-                        d.color = maniwordle.color().call(this, d, i);
+                    if (d.userColor) {
+
+                        d.color = d.userColor;
+
                     } else {
-                        d.color = 'red';
+
+                        d.color = maniwordle.color().call(this, d, i);
+
                     }
+
+
                     return d;
 
                 });
@@ -332,7 +339,7 @@
 
                 d = getSelectedWord();
                 var color = d3.select("#colorpicker").property("value");
-                d.color = color;
+                d.userColor = d.color = color;
 
                 svg.select('#' + d.text).attr('fill', color);
                 //maniwordle.redraw(true, drawTransition);
@@ -350,11 +357,19 @@
 
             interaction.rotateSelection = function () {
 
-                d = getSelectedWord();
-                d.rotate = +d3.select('#rotation').property('value');
+                newAngle = +d3.select('#rotation').property('value');
 
-                maniwordle.redraw(true, drawTransition);
+                if (Number.isNaN(newAngle)) {
 
+                    alert('Please enter a valid number!');
+
+                } else {
+
+                    d = getSelectedWord();
+                    d.rotate = newAngle;
+
+                    maniwordle.redraw(true, drawTransition);
+                }
             };
 
             function getSelectedWord() {
@@ -365,8 +380,6 @@
 
                 return null;
             }
-
-
 
             interaction.loadTextsource = function () {
 

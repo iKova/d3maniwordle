@@ -7,6 +7,7 @@
     <script src="../js/SAT.js"></script>
     <script src="../d3.maniwordle.js"></script>
     <script type="text/javascript" src="../js/jscolor/jscolor.js"></script>
+    <title>D3.Maniwordle</title>
 </head>
 <body>
 <script type="text/javascript">
@@ -31,33 +32,8 @@
 
     // needs to be an Array of Objects with attributes 'text' and 'weight'!
     var data = getDataFromText(str);
-    data.sort(function (a, b) {
-        return b.weight - a.weight;
-    });
 
-    var data_max = d3.max(data, function (d) {
-        return d.weight;
-    });
-
-    var scale = d3.scale.pow().domain([0, data_max]).range([10, 80]);
-    var cscale = d3.scale.category20b().domain([0, data_max]);
-
-    var maniwordle = d3.maniwordle()
-            .words(data)
-            .startx(width / 2)
-            .starty(height / 2)
-            .color(function (d, i) {
-                return cscale(i);
-            })
-            .weight(function (d, i) {
-                return scale(d.weight);
-            })
-            .rotate(function (d, i) {
-                return ~~(( Math.random() < .5 ? -1 : 1 ) * Math.random() * 90)
-            });
-
-    var interaction = maniwordle.interaction();
-    maniwordle.start();
+    drawNewManiWordle(data);
 
     function getDataFromText(str) {
 
@@ -94,9 +70,7 @@
         d3.select('#textinput').property('value', getTextData());
     }
 
-    function redrawNewManiWordle() {
-
-        data = interaction.loadTextsource();
+    function drawNewManiWordle(data) {
 
         data.sort(function (a, b) {
             return b.weight - a.weight;
@@ -144,8 +118,9 @@ Change rotation: <input onChange='interaction.rotateSelection();' id="rotation" 
     Unpin Word
 </button>
 <br><br>
-<label for="colorpicker"> <input onChange='interaction.changeColor();' type="color" id="colorpicker"> Color </label>
-<label for="fontpicker">
+<label for="colorpicker"> Color:&nbsp; </label>
+<input onChange='interaction.changeColor();' type="color" id="colorpicker">
+<label for="fontpicker"> Font:&nbsp; </label>
     <select  onChange='interaction.changeFont();'  id="fontpicker">
         <option>Helvetica</option>
         <option>Arial</option>
@@ -164,22 +139,22 @@ Change rotation: <input onChange='interaction.rotateSelection();' id="rotation" 
         <option>Impact</option>
         <option>Oldtown</option>
     </select>
-    Font-Family </label>
+
 <br><br>
 <textarea type="textarea" id="textsource" style="width: 900px;"> Insert your text here... </textarea>
 
 <div>
-    <button onClick='redrawNewManiWordle()'>
+    <button onClick='drawNewManiWordle(interaction.loadTextsource())'>
         Load Text
     </button>
-    <label for="wordnumb"> <input onChange='redrawNewManiWordle()' id="wordnumb" value="50" min="5" max="100"
+    <label for="wordnumb"> <input id="wordnumb" value="50" min="5" max="100"
                                   type="number" style="width:50px"> max. #Word </label>
-    <label for="stoprem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="stoprem">
-        Stopwords-Removal </label>
-    <label for="punctrem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="punctrem">
-        Punctuation-Removal </label>
-    <label for="numbrem"> <input onChange='redrawNewManiWordle()' type="checkbox" value="false" id="numbrem">
-        Number-Removal </label>
+    <label for="stoprem"> <input type="checkbox" value="false" id="stoprem">
+        Remove Stopwords </label>
+    <label for="punctrem"> <input type="checkbox" value="false" id="punctrem">
+        Remove Punctuation </label>
+    <label for="numbrem"> <input type="checkbox" value="false" id="numbrem">
+        Remove Numbers </label>
 </div>
 
 
