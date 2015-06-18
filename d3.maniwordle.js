@@ -78,7 +78,7 @@
 
                 bb = textElements[0][i].getBBox();
 
-                d.width = bb.width;
+                d.width = bb.width * 1.1;
                 d.height = bb.height * (2 / 3);
 
                 return d;
