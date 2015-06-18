@@ -3,4 +3,4 @@ Implementation of a Manipulable Wordle (ManiWordle) introduced by Koh et al. (ht
 
 Based on d3.js (https://github.com/mbostock/d3) and sat.js (https://github.com/jriecken/sat-js) using jscolor (http://jscolor.com).
 
-Not finished yet.
+Use the example.html as reference.
